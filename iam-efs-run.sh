@@ -271,7 +271,7 @@ cat <<EOF | oc apply -f -
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: demo-1-vpc
+  name: demo-2-vpc
   namespace: demo-2
 spec:
   storageClassName: demo-2-storageclass
@@ -292,3 +292,5 @@ sleep 30
 oc apply -f kyverno-policy.yaml
 
 set -x
+
+

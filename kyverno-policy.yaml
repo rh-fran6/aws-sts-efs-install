@@ -16,16 +16,22 @@ spec:
         - resources:
             kinds:
             - PersistentVolumeClaim
+    preconditions:
+      all:
+        - key: "{{ request.object.spec.storageClassName}}"
+          operator: NotEquals
+          value: "gp*"
     exclude:
-        any:
+      any:
         - resources:
             namespaces:
             - openshift-*
     validate:
-      message: "Users and pods can only use storage from storage classes prefixed with the name of their namespace."
+      message: "Can only create EFS PVCs prefixed with {{ request.object.metadata.namespace }}"
       pattern:
         spec:
-          storageClassName: "{{request.object.metadata.namespace}}-*"
+          storageClassName: "{{ request.object.metadata.namespace }}-*"
+
 
 ---
 
