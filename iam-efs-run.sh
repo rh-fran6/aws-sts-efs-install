@@ -132,7 +132,7 @@ attach_policy_to_role "$CLUSTER_NAME" "$POLICY_ARN"
 # Rest of the script...
 
 ## Extract Region
-AWS_REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
+AWS_REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]') ## Unnecessary
 
 ## Create EFS and grab the ID
 FILE_SYSTEM_ID1=$(aws efs create-file-system --region ${AWS_REGION} --encrypted --performance-mode generalPurpose --tags Key=Name,Value="EFS_Storage_Class_1"  --query 'FileSystemId' --output text)  
