@@ -284,13 +284,32 @@ EOF
 
 ## Test 
 
-# Install Kyverno
-helm install kyverno kyverno/ -n kyverno --create-namespace --set replicaCount=3
+echo Creating OPA gatekeper instance
+cat <<EOF | oc apply -f -
+apiVersion: operator.gatekeeper.sh/v1alpha1
+kind: Gatekeeper
+metadata:
+  name: gatekeeper
+spec:
+  audit:
+    logLevel: INFO
+    replicas: 1
+  mutatingWebhook: Enabled
+  validatingWebhook: Enabled
+  webhook:
+    admissionEventsInvolvedNamespace: Enabled
+    emitAdmissionEvents: Enabled
+    logLevel: DEBUG
+    logMutations: Enabled
+    mutationAnnotations: Enabled
+    replicas: 1
+EOF
 
-sleep 30
+sleep 60
 
-oc apply -f kyverno-policy.yaml
+echo Creating OPA Gatekeeper policy
+oc apply -f opa-gatekeeper-policy.yaml
 
-set -x
+echo Completed
 
 

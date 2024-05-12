@@ -1,0 +1,59 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: openshiftesomultitenancy
+spec:
+  crd:
+    spec:
+      names:
+        kind: OpenshiftEsoMultiTenancy
+      validation:
+        openAPIV3Schema:
+          type: object          
+
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+      
+        package openshiftesomultitenancy 
+
+        violation[{"msg": msg}] {    
+            input.review.object.kind.kind == "ExternalSecret"
+            input.request.operation == "CREATE"
+            data := input.spec.data[_]
+            not startswith(data.remoteRef.key, input.review.object.metadata.namespace)
+            msg := sprintf("RemoteRef key '%s' does not start with namespace '%s'", [data.remoteRef.key, input.review.object.metadata.namespace])
+        }
+
+        violation[{"msg": msg}] {
+            input.kind.kind == "SecretStore"
+            input.request.operation == "CREATE"
+            input.review.object.metadata.namespace != "platform"
+            msg := "Creating SecretStore resources across the cluster is only allowed from the 'platform' namespace."
+        }
+
+        violation[{"msg": msg}] {
+            input.kind.kind == "ClusterSecretStore"
+            input.request.operation == "CREATE"
+            input.review.object.metadata.namespace != "platform"
+            msg := "Creating ClusterSecretStore resources across the cluster is only allowed from the 'platform' namespace."
+        }
+
+
+---    
+
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: OpenshiftEsoMultiTenancy
+metadata:
+  name: secret-as-a-service
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["ExternalSecret"]
+      - apiGroups: [""]
+        kinds: ["ClusterSecretStore"]
+      - apiGroups: [""]
+        kinds: ["SecretStore"]
+        
