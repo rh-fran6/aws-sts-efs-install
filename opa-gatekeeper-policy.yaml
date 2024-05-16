@@ -40,3 +40,5 @@ spec:
       - apiGroups: [""]
         kinds: ["PersistentVolumeClaim"]
     excludedNamespaces: ["openshift-*", kube-*]
+
+
